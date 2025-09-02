@@ -395,5 +395,8 @@ def download_csv(n, data_json):
     return dcc.send_data_frame(df.to_csv, "volve_producers_subset.csv", index=False)
 
 
+server = app.server # This exposes the Flask server object to Gunicorn
+
+
 if __name__ == "__main__":
     app.run(debug=True)
