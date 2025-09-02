@@ -17,7 +17,7 @@ from io import StringIO
 # -----------------------------------
 # Config
 # -----------------------------------
-APP_TITLE = "Volve Field — Well Production EDA"
+APP_TITLE = "Volve Field - Well Production EDA"
 THEME = dbc.themes.FLATLY
 DEFAULT_FILE: Optional[str] = "./volve_production_data.xlsx"
 
