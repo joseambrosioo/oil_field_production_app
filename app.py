@@ -88,24 +88,16 @@ header = dbc.Navbar(
             html.Span("⛽", className="me-2"),
             dbc.NavbarBrand(APP_TITLE, class_name="fw-bold", style={"color": "black"}),
         ], className="d-flex align-items-center"),
-        dbc.Badge("Interactive EDA", color="primary", className="ms-auto")
+        dbc.Badge("Dashboard", color="primary", className="ms-auto")
     ]),
     color="light",
     class_name="shadow-sm mb-3"
 )
 
-# Remove file_controls entirely and replace with a simple message and dcc.Store
-data_info = dbc.Card(
-    dbc.CardBody([
-        html.H6("Data Source", className="fw-semibold mb-2"),
-        html.Div(f"Using default file: {DEFAULT_FILE}", className="small text-muted"),
-    ]), class_name="mb-3"
-)
-
 # ---------------- Tabs -----------------
 ask_tab = dcc.Markdown(
     """
-### ASK — Business Task & Stakeholders
+### ❓ ASK — Business Task & Stakeholders
 **Business Task**: Analyze production data of **producer wells** in the Volve field to compare wells, highlight high performers, and flag wells trending toward dryness.
 
 **Stakeholders**: Primary — Production Manager. Secondary — Sales & Marketing.
@@ -116,12 +108,18 @@ ask_tab = dcc.Markdown(
 )
 
 prepare_tab = html.Div([
+    dcc.Markdown("### 📝 PREPARE — Getting to Know the Data", className="p-2"),
     html.H6("Data Source & Overview", className="fw-semibold"),
     dcc.Markdown(
         """
-- Source: Equinor Volve Field Data Village (Well-Production Excel).  
-- Columns of interest include: `DATEPRD`, `NPD_WELL_BORE_CODE`, `WELL_TYPE`, `BORE_OIL_VOL`, `BORE_GAS_VOL`, `BORE_WAT_VOL`, and operating/pressure/temperature metrics.
-- We will focus on rows with `WELL_TYPE == 'OP'` (producer wells).
+The data used in this dashboard comes from the Equinor Volve Field Data Village. We are focusing on data from **producer wells**, which are identified by a `WELL_TYPE` of `'OP'`.
+
+- **Data Points**: Each row represents a day's production and operating conditions for a specific well. The most important metrics are the daily volumes of oil, gas, and water produced. Other measurements, like pressure and temperature, give us a more complete picture of the well's performance.
+
+#### **Key Insights from Data Preparation**
+- **Overview Cards**: The cards at the top show a high-level summary, including the total number of data records (rows) and the number of unique producer wells in our dataset.
+- **Missing Data**: The bar chart below shows the percentage of missing data for each column. Missing data is normal and can occur due to sensor issues or operational downtime. This chart helps us understand the reliability of the data for different metrics.
+- **Raw Data Preview**: The table shows the first 10 rows of the raw data. This is useful for a quick check to ensure the data was loaded correctly and to see what the raw information looks like.
         """
     ),
     html.Div(id="overview-cards"),
@@ -134,22 +132,26 @@ prepare_tab = html.Div([
 ])
 
 process_tab = html.Div([
+    dcc.Markdown("### 🛠️ PROCESS — Cleaning and Structuring the Data", className="p-2"),
     html.H6("Processing Notes", className="fw-semibold"),
     dcc.Markdown(
         """
-- Filter to producer wells (`WELL_TYPE = 'OP'`).  
-- Normalize types: cast `DATEPRD` to datetime and `NPD_WELL_BORE_CODE` to string.  
-- Optional: drop descriptive facility/name columns not used in analysis.  
-- Provide toggles to exclude historically low-producing wells (e.g., 7405, 7289, 5769).
+To prepare the data for analysis, we have performed the following steps:
+- **Filtering**: We filtered the raw data to include only producer wells, which are identified by `WELL_TYPE = 'OP'`.
+- **Type Conversion**: We converted the `DATEPRD` column to a standard date format and the `NPD_WELL_BORE_CODE` to a string to ensure consistent handling.
+- **Exclusion**: The dashboard offers an optional toggle to exclude historically low-producing wells from the analysis, which helps to focus on the most active and commercially important wells.
         """
     ),
     dbc.Alert("Use the controls in the Analyze tab to filter wells and time windows.", color="info", class_name="mt-2")
 ])
 
 analyze_tab = html.Div([
+    dcc.Markdown("### 📈 ANALYZE — Exploring Production Trends", className="p-2"),
     dbc.Row([
         dbc.Col([
             html.H6("Filters", className="fw-semibold"),
+            dcc.Markdown("#### Controls for Analysis"),
+            dcc.Markdown("Use these filters to customize your view and explore specific trends."),
             dbc.Checklist(
                 id="exclude-low",
                 options=[{"label": "Exclude historically low producers (7405, 7289, 5769)", "value": "exclude"}],
@@ -176,17 +178,60 @@ analyze_tab = html.Div([
             html.Div(id="selection-summary", className="small text-muted mt-2"),
         ], md=3),
         dbc.Col([
+            dcc.Markdown("#### Key Visualizations"),
+            dcc.Markdown("Each chart provides a different perspective on the well production data. Hover over the graphs for more details."),
             dbc.Tabs([
-                dbc.Tab(dcc.Graph(id="ts-line"), label="Time Series"),
-                dbc.Tab(dcc.Graph(id="ecdf"), label="ECDF"),
-                dbc.Tab(dcc.Graph(id="rank-bar"), label="Totals by Well"),
-                dbc.Tab(dcc.Graph(id="corr-heat"), label="Correlation"),
+                dbc.Tab(
+                    children=[
+                        dcc.Graph(id="ts-line"),
+                        dcc.Markdown(
+                            """
+                            **Time Series**: This chart displays the daily production (light, noisy lines) and the rolling average (smooth, dark lines) over time. This helps you identify long-term trends, such as production decline, and spot sudden drops to zero production which often indicate a well was temporarily shut down for maintenance.
+                            """
+                        )
+                    ],
+                    label="Time Series"
+                ),
+                dbc.Tab(
+                    children=[
+                        dcc.Graph(id="ecdf"),
+                        dcc.Markdown(
+                            """
+                            **ECDF (Empirical Cumulative Distribution Function)**: This chart compares the consistency of production across different wells. For any given production volume on the x-axis, the y-axis tells you the percentage of days that a well's production was at or below that volume. A well with a steeper curve at lower production levels spends more days with low or zero output, suggesting it might be less reliable or have more downtime.
+                            """
+                        )
+                    ],
+                    label="ECDF"
+                ),
+                dbc.Tab(
+                    children=[
+                        dcc.Graph(id="rank-bar"),
+                        dcc.Markdown(
+                            """
+                            **Totals by Well**: This bar chart ranks the wells by their total cumulative oil production over the selected period. It's the simplest way to see which wells are the top performers. You can hover over a bar to see the total amount of oil, gas, and water produced by that well.
+                            """
+                        )
+                    ],
+                    label="Totals by Well"
+                ),
+                dbc.Tab(
+                    children=[
+                        dcc.Graph(id="corr-heat"),
+                        dcc.Markdown(
+                            """
+                            **Correlation**: This heatmap shows the relationship between different variables. Green indicates a strong positive relationship (e.g., as one metric increases, the other also increases). Red indicates a negative relationship (e.g., as one metric increases, the other decreases). This helps uncover insights, like whether higher pressure (`AVG_WHP_P`) leads to greater oil production (`BORE_OIL_VOL`).
+                            """
+                        )
+                    ],
+                    label="Correlation"
+                ),
             ])
         ], md=9)
     ], class_name="g-3")
 ])
 
 share_tab = html.Div([
+    dcc.Markdown("### 🤝 SHARE — Communicating Key Findings", className="p-2"),
     html.H6("Key Findings (Auto-updated)", className="fw-semibold"),
     html.Div(id="findings"),
     html.Hr(),
@@ -199,7 +244,7 @@ share_tab = html.Div([
 
 act_tab = dcc.Markdown(
     """
-### ACT — Recommendations
+### 🚀 ACT — Recommendations
 - **Monitor decline**: All significant wells show typical late-life decline; plan end-of-life optimization and lift strategies as needed.
 - **Economics**: Historically low producers (e.g., 7405, 7289, 5769) exhibit minimal oil with rising water — candidates for decommissioning or workover only if justified by nearby infrastructure or enhanced recovery pilots.
 - **Ops cadence**: Periodic zeros in production align with reduced on‑stream hours; ensure shutdowns are tracked to separate operational from reservoir effects.
@@ -211,7 +256,6 @@ act_tab = dcc.Markdown(
 app.layout = dbc.Container([
     header,
     dcc.Store(id="store-bundle", data=initial_data_json),
-    data_info,
     dbc.Tabs([
         dbc.Tab(ask_tab, label="Ask"),
         dbc.Tab(prepare_tab, label="Prepare"),
@@ -373,11 +417,13 @@ def findings_text(data_json, exclude_low, ycol):
     low_wells = sorted(list(all_wells - set(top_wells)))
     low = [str(well) for well in low_wells]
 
+    # This is the updated text for the 'findings' section
     md = f"""
-- **Top oil producers**: `{', '.join(top)}` by cumulative oil volume.
-- **Low producers**: `{', '.join(low)}` under current filters.
-- **Oil vs Gas**: Correlation often positive; confirm on **Correlation** tab.
-- **Operational downtime**: Zero-production days apparent in Time Series — aligns with reduced `ON_STREAM_HRS`.
+This section synthesizes the most important insights from your selections on the **Analyze** tab.
+- **Top Oil Producers**: The top performers by cumulative oil volume are `{', '.join(top)}`.
+- **Low Producers**: The wells with the lowest production under the current filters are `{', '.join(low)}`.
+- **Operational Downtime**: The time series chart often reveals operational pauses, suggesting that production drops are due to shutdowns and not just reservoir decline.
+- **Key Relationships**: The correlation heatmap provides quick insights into the relationships between key metrics like oil and gas volumes or pressure and temperature.
     """
     return dcc.Markdown(md)
 
