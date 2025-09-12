@@ -108,15 +108,15 @@ ask_tab = dcc.Markdown(
 )
 
 prepare_tab = html.Div([
-    dcc.Markdown("### 📝 PREPARE — Getting to Know the Data", className="p-2"),
-    html.H6("Data Source & Overview", className="fw-semibold"),
+    dcc.Markdown("### 📝 PREPARE — Getting and Cleaning the Data", className="p-2"),
+    dcc.Markdown("##### **Data Source & Overview**", className="fw-semibold"),
     dcc.Markdown(
         """
 The data used in this dashboard comes from the Equinor Volve Field Data Village. We are focusing on data from **producer wells**, which are identified by a `WELL_TYPE` of `'OP'`.
 
 - **Data Points**: Each row represents a day's production and operating conditions for a specific well. The most important metrics are the daily volumes of oil, gas, and water produced. Other measurements, like pressure and temperature, give us a more complete picture of the well's performance.
 
-#### **Key Insights from Data Preparation**
+##### **Key Insights from Data Preparation**
 - **Overview Cards**: The cards at the top show a high-level summary, including the total number of data records (rows) and the number of unique producer wells in our dataset.
 - **Missing Data**: The bar chart below shows the percentage of missing data for each column. Missing data is normal and can occur due to sensor issues or operational downtime. This chart helps us understand the reliability of the data for different metrics.
 - **Raw Data Preview**: The table shows the first 10 rows of the raw data. This is useful for a quick check to ensure the data was loaded correctly and to see what the raw information looks like.
@@ -124,16 +124,10 @@ The data used in this dashboard comes from the Equinor Volve Field Data Village.
     ),
     html.Div(id="overview-cards"),
     html.Hr(),
-    html.H6("Missingness by Column (Producer subset)", className="fw-semibold"),
+    dcc.Markdown("##### **Missingness by Column (Producer subset)**", className="fw-semibold"),
     dcc.Graph(id="missingness-bar"),
     html.Hr(),
-    html.H6("Raw Preview (first 10 rows)", className="fw-semibold"),
-    html.Div(id="raw-table"),
-])
-
-process_tab = html.Div([
-    dcc.Markdown("### 🛠️ PROCESS — Cleaning and Structuring the Data", className="p-2"),
-    html.H6("Processing Notes", className="fw-semibold"),
+    dcc.Markdown("##### **Data Processing Steps**", className="fw-semibold"),
     dcc.Markdown(
         """
 To prepare the data for analysis, we have performed the following steps:
@@ -142,6 +136,9 @@ To prepare the data for analysis, we have performed the following steps:
 - **Exclusion**: The dashboard offers an optional toggle to exclude historically low-producing wells from the analysis, which helps to focus on the most active and commercially important wells.
         """
     ),
+    html.Hr(),
+    dcc.Markdown("##### **Raw Preview (first 10 rows)**", className="fw-semibold"),
+    html.Div(id="raw-table"),
     dbc.Alert("Use the controls in the Analyze tab to filter wells and time windows.", color="info", class_name="mt-2")
 ])
 
@@ -232,10 +229,10 @@ analyze_tab = html.Div([
 
 share_tab = html.Div([
     dcc.Markdown("### 🤝 SHARE — Communicating Key Findings", className="p-2"),
-    html.H6("Key Findings (Auto-updated)", className="fw-semibold"),
+    dcc.Markdown("##### **Key Findings (Auto-updated)**", className="fw-semibold"),
     html.Div(id="findings"),
     html.Hr(),
-    html.H6("Download Processed Data", className="fw-semibold"),
+    dcc.Markdown("##### **Download Processed Data**", className="fw-semibold"),
     html.Div([
         dbc.Button("Download Producer Subset (CSV)", id="btn-dl", color="primary"),
         dcc.Download(id="dl-csv")
@@ -259,7 +256,6 @@ app.layout = dbc.Container([
     dbc.Tabs([
         dbc.Tab(ask_tab, label="Ask"),
         dbc.Tab(prepare_tab, label="Prepare"),
-        dbc.Tab(process_tab, label="Process"),
         dbc.Tab(analyze_tab, label="Analyze"),
         dbc.Tab(share_tab, label="Share"),
         dbc.Tab(act_tab, label="Act"),
