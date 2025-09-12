@@ -86,7 +86,7 @@ header = dbc.Navbar(
     dbc.Container([
         html.Div([
             html.Span("⛽", className="me-2"),
-            dbc.NavbarBrand(APP_TITLE, class_name="fw-bold", style={"color": "black"}),
+            dbc.NavbarBrand(APP_TITLE, class_name="fw-bold text-wrap", style={"color": "black"}),
         ], className="d-flex align-items-center"),
         dbc.Badge("Dashboard", color="primary", className="ms-auto")
     ]),
