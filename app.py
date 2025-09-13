@@ -139,7 +139,7 @@ To prepare the data for analysis, we have performed the following steps:
     html.Hr(),
     dcc.Markdown("##### **Raw Preview (first 10 rows)**", className="fw-semibold"),
     html.Div(id="raw-table"),
-    dbc.Alert("Use the controls in the Analyze tab to filter wells and time windows.", color="info", class_name="mt-2")
+    # dbc.Alert("Use the controls in the Analyze tab to filter wells and time windows.", color="info", class_name="mt-2")
 ])
 
 analyze_tab = html.Div([
