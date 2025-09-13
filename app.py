@@ -298,8 +298,23 @@ def prep_overview(data_json):
     table = dash_table.DataTable(
         data=df.head(10).to_dict("records"),
         columns=[{"name": c, "id": c} for c in df.columns],
-        style_table={"overflowX": "auto"},
-        page_size=10,
+        sort_action="native",
+        filter_action="native",
+        page_action="none",
+        style_table={'overflowX': 'auto', 'width': '100%'},
+        style_header={
+            'backgroundColor': 'rgb(230, 230, 230)',
+            'fontWeight': 'bold',
+            'textAlign': 'center',
+        },
+        style_cell={
+            'textAlign': 'left',
+            'padding': '5px',
+            'font-size': '12px',
+            'minWidth': '80px', 'width': 'auto', 'maxWidth': '150px',
+            'overflow': 'hidden',
+            'textOverflow': 'ellipsis',
+        },
     )
 
     return cards, fig_miss, table
