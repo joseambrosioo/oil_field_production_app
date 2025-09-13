@@ -294,12 +294,23 @@ def prep_overview(data_json):
     fig_miss = px.bar(miss_pct, labels={"value": "% Missing", "index": "Column"})
     fig_miss.update_layout(margin=dict(l=10, r=10, t=10, b=10))
 
+    # --- UPDATED: Define column types for proper filtering ---
+    column_defs = []
+    for col in df.columns:
+        if pd.api.types.is_numeric_dtype(df[col]):
+            column_defs.append({"name": col, "id": col, "type": "numeric"})
+        elif pd.api.types.is_datetime64_any_dtype(df[col]):
+            column_defs.append({"name": col, "id": col, "type": "datetime"})
+        else:
+            column_defs.append({"name": col, "id": col, "type": "text"})
+
     # Raw preview
     table = dash_table.DataTable(
+        id='raw-data-table',
+        columns=column_defs,  # Use the new, typed column definitions
         data=df.head(10).to_dict("records"),
-        columns=[{"name": c, "id": c} for c in df.columns],
-        sort_action="native",
         filter_action="native",
+        sort_action="native",
         page_action="none",
         style_table={'overflowX': 'auto', 'width': '100%'},
         style_header={
