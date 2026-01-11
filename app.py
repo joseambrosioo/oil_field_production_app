@@ -22,8 +22,8 @@ import re
 # -----------------------------------
 # Config
 # -----------------------------------
-APP_TITLE = "Volve Field - Well Production EDA"
-THEME = dbc.themes.FLATLY
+APP_TITLE = "Volve Field - Well Production"
+THEME = dbc.themes.FLATLY   
 DEFAULT_FILE: Optional[str] = "./dataset/volve_production_data.xlsx"
 
 NUMERIC_COLS_CORE = [
